@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Land Deal Analyzer</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0d0d14;
+      color: #e8e6f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.5;
+      padding: 32px 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+    }
+    .subtitle {
+      color: #6b6690;
+      font-size: 14px;
+      margin-bottom: 28px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 640px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #6b6690;
+      font-weight: 600;
+    }
+    input, select, textarea {
+      background: #13121d;
+      border: 1px solid rgba(127,119,221,0.25);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #e8e6f0;
+      font-size: 15px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #7F77DD;
+    }
+    input::placeholder, textarea::placeholder {
+      color: #4e4a6a;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    .btn {
+      background: #534AB7;
+      color: #f0eeff;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 24px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      margin-top: 8px;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid rgba(127,119,221,0.35);
+      color: #9994b8;
+    }
+    .btn-danger {
+      background: rgba(220, 50, 50, 0.2);
+      color: #ff6b6b;
+      border: 1px solid rgba(220, 50, 50, 0.35);
+      padding: 8px 16px;
+      font-size: 13px;
+    }
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .results {
+      margin-top: 24px;
+      padding: 20px;
+      background: #13121d;
+      border: 1px solid rgba(127,119,221,0.2);
+      border-radius: 14px;
+    }
+    .results h3 {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6b6690;
+      margin-bottom: 16px;
+    }
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 0.5px solid rgba(127,119,221,0.1);
+    }
+    .metric-row:last-child { border-bottom: none; }
+    .metric-label { color: #9994b8; font-size: 14px; }
+    .metric-value { font-weight: 700; font-size: 16px; }
+    .positive { color: #1D9E75; }
+    .neutral { color: #f0eeff; }
+    .negative { color: #ff6b6b; }
+
+    .saved-list {
+      margin-top: 32px;
+    }
+    .saved-list h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      letter-spacing: -0.3px;
+    }
+    .deal-card {
+      background: #13121d;
+      border: 0.5px solid rgba(127,119,221,0.15);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 14px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .deal-card:hover {
+      border-color: rgba(127,119,221,0.4);
+    }
+    .deal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .deal-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #f0eeff;
+    }
+    .deal-zoning {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: rgba(83,74,183,0.2);
+      color: #c0baf0;
+      padding: 3px 10px;
+      border-radius: 5px;
+      border: 0.5px solid rgba(127,119,221,0.3);
+    }
+    .deal-meta {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: #4e4a6a;
+    }
+    .deal-meta span {
+      color: #9994b8;
+    }
+    .deal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .hidden { display: none !important; }
+    .badge {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 5px;
+      font-weight: 600;
+    }
+    .badge-good { background: rgba(29,158,117,0.15); color: #1D9E75; }
+    .badge-avg { background: rgba(255,193,7,0.15); color: #ffc107; }
+    .badge-bad { background: rgba(220,50,50,0.15); color: #ff6b6b; }
+  </style>
+</head>
+<body>
+  <h1>Land Deal Analyzer</h1>
+  <p class="subtitle">Personal tool. No data leaves your browser.</p>
+
+  <form id="dealForm">
+    <div class="grid">
+      <div class="field">
+        <label for="location">Location / Address</label>
+        <input type="text" id="location" placeholder="e.g. 742 Maple St, Oakland CA" required>
+      </div>
+      <div class="field">
+        <label for="zoning">Zoning</label>
+        <select id="zoning" required>
+          <option value="">Select zoning...</option>
+          <option value="Residential">Residential</option>
+          <option value="Commercial">Commercial</option>
+          <option value="Agricultural">Agricultural</option>
+          <option value="Mixed-Use">Mixed-Use</option>
+          <option value="Industrial">Industrial</option>
+          <option value="Vacant Land">Vacant Land</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="acreage">Acreage</label>
+        <input type="number" id="acreage" step="0.01" min="0" placeholder="e.g. 5.25" required>
+      </div>
+      <div class="field">
+        <label for="price">Asking Price ($)</label>
+        <input type="number" id="price" min="0" placeholder="e.g. 150000" required>
+      </div>
+      <div class="field">
+        <label for="arv">Est. After Repair Value ($)</label>
+        <input type="number" id="arv" min="0" placeholder="Optional — leave blank if unknown">
+      </div>
+      <div class="field">
+        <label for="rehab">Est. Rehab / Development ($)</label>
+        <input type="number" id="rehab" min="0" placeholder="Optional">
+      </div>
+    </div>
+    <div class="field" style="margin-top: 16px;">
+      <label for="notes">Notes</label>
+      <textarea id="notes" placeholder="Road access, utilities, flood zone, restrictions, comps..."></textarea>
+    </div>
+    <div class="actions">
+      <button type="submit" class="btn">Analyze Deal</button>
+      <button type="button" class="btn btn-secondary" id="clearBtn">Clear</button>
+      <button type="button" class="btn btn-danger" id="clearAllBtn">Delete All Saved</button>
+    </div>
+  </form>
+
+  <div id="resultArea" class="results hidden">
+    <h3>Analysis Results</h3>
+    <div class="metric-row">
+      <span class="metric-label">Price Per Acre</span>
+      <span class="metric-value neutral" id="pricePerAcre">—</span>
+    </div>
+    <div class="metric-row">
+      <span class="metric-label">Total Investment (Price + Rehab)</span>
+      <span class="metric-value neutral" id="totalInvestment">—</span>
+    </div>
+    <div class="metric-row">
+      <span class="metric-label">Investment Per Acre</span>
+      <span class="metric-value neutral" id="investmentPerAcre">—</span>
+    </div>
+    <div class="metric-row" id="profitRow">
+      <span class="metric-label">Est. Profit (ARV - Total Investment)</span>
+      <span class="metric-value" id="estProfit">—</span>
+    </div>
+    <div class="metric-row" id="roiRow">
+      <span class="metric-label">ROI</span>
+      <span class="metric-value" id="roi">—</span>
+    </div>
+    <div class="metric-row">
+      <span class="metric-label">Deal Rating</span>
+      <span id="ratingBadge"></span>
+    </div>
+  </div>
+
+  <div class="saved-list">
+    <h2>Saved Deals <span style="color:#6b6690; font-size:14px; font-weight:400">(<span id="dealCount">0</span>)</span></h2>
+    <div id="dealsContainer"></div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'landDeals_v1';
+    let currentDealId = null;
+
+    function formatCurrency(n) {
+      if (!n && n !== 0) return '—';
+      return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }
+
+    function formatNumber(n, decimals = 2) {
+      if (!n && n !== 0) return '—';
+      return Number(n).toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+    }
+
+    function getDeals() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      } catch { return []; }
+    }
+
+    function saveDeals(deals) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(deals));
+    }
+
+    function renderDeals() {
+      const deals = getDeals();
+      document.getElementById('dealCount').textContent = deals.length;
+      const container = document.getElementById('dealsContainer');
+      if (deals.length === 0) {
+        container.innerHTML = '<p style="color:#4e4a6a; font-size:14px;">No deals saved yet. Fill out the form above and hit Analyze Deal.</p>';
+        return;
+      }
+      container.innerHTML = deals.map(d => {
+        const ppa = d.acreage > 0 ? (d.price / d.acreage) : 0;
+        return `
+          <div class="deal-card" data-id="${d.id}">
+            <div class="deal-header">
+              <div>
+                <div class="deal-title">${escapeHtml(d.location)}</div>
+                <div class="deal-meta" style="margin-top:6px;">
+                  <span>${formatCurrency(ppa)}/acre</span> · <span>${formatNumber(d.acreage)} acres</span> · <span>${formatCurrency(d.price)}</span>
+                </div>
+              </div>
+              <span class="deal-zoning">${escapeHtml(d.zoning)}</span>
+            </div>
+            ${d.notes ? `<p style="font-size:13px;color:#4e4a6a;margin-top:8px;line-height:1.5">${escapeHtml(d.notes.substring(0, 120))}${d.notes.length > 120 ? '...' : ''}</p>` : ''}
+            <div class="deal-actions">
+              <button class="btn btn-secondary" style="padding:8px 16px; font-size:13px;" onclick="loadDeal('${d.id}')">Load</button>
+              <button class="btn btn-danger" style="padding:8px 16px; font-size:13px;" onclick="deleteDeal('${d.id}')">Delete</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function escapeHtml(t) {
+      const div = document.createElement('div');
+      div.textContent = t;
+      return div.innerHTML;
+    }
+
+    function analyzeDeal() {
+      const location = document.getElementById('location').value.trim();
+      const zoning = document.getElementById('zoning').value;
+      const acreage = parseFloat(document.getElementById('acreage').value) || 0;
+      const price = parseFloat(document.getElementById('price').value) || 0;
+      const arv = parseFloat(document.getElementById('arv').value) || 0;
+      const rehab = parseFloat(document.getElementById('rehab').value) || 0;
+      const notes = document.getElementById('notes').value.trim();
+
+      if (!location || !zoning || acreage <= 0 || price <= 0) {
+        alert('Fill in Location, Zoning, Acreage, and Price.');
+        return;
+      }
+
+      const pricePerAcre = acreage > 0 ? price / acreage : 0;
+      const totalInv = price + rehab;
+      const invPerAcre = acreage > 0 ? totalInv / acreage : 0;
+      const profit = arv > 0 ? arv - totalInv : null;
+      const roi = (arv > 0 && totalInv > 0) ? ((profit / totalInv) * 100) : null;
+
+      document.getElementById('pricePerAcre').textContent = formatCurrency(pricePerAcre);
+      document.getElementById('totalInvestment').textContent = formatCurrency(totalInv);
+      document.getElementById('investmentPerAcre').textContent = formatCurrency(invPerAcre);
+
+      const profitEl = document.getElementById('estProfit');
+      const profitRow = document.getElementById('profitRow');
+      if (profit !== null) {
+        profitEl.textContent = (profit >= 0 ? '+' : '') + formatCurrency(profit);
+        profitEl.className = 'metric-value ' + (profit >= 0 ? 'positive' : 'negative');
+        profitRow.style.display = 'flex';
+      } else {
+        profitRow.style.display = 'none';
+      }
+
+      const roiEl = document.getElementById('roi');
+      const roiRow = document.getElementById('roiRow');
+      if (roi !== null) {
+        roiEl.textContent = roi.toFixed(1) + '%';
+        roiEl.className = 'metric-value ' + (roi >= 20 ? 'positive' : roi >= 10 ? 'neutral' : 'negative');
+        roiRow.style.display = 'flex';
+      } else {
+        roiRow.style.display = 'none';
+      }
+
+      // Simple rating
+      const badge = document.getElementById('ratingBadge');
+      let ratingClass = 'badge-avg';
+      let ratingText = 'NEEDS MORE DATA';
+      if (roi !== null) {
+        if (roi >= 30) { ratingClass = 'badge-good'; ratingText = 'STRONG BUY'; }
+        else if (roi >= 15) { ratingClass = 'badge-good'; ratingText = 'GOOD DEAL'; }
+        else if (roi >= 5) { ratingClass = 'badge-avg'; ratingText = 'AVERAGE'; }
+        else { ratingClass = 'badge-bad'; ratingText = 'WEAK'; }
+      } else if (pricePerAcre > 0) {
+        // No ARV — rough acreage-based heuristic (very loose)
+        ratingText = 'REVIEW MANUALLY';
+        ratingClass = 'badge-avg';
+      }
+      badge.innerHTML = `<span class="badge ${ratingClass}">${ratingText}</span>`;
+
+      document.getElementById('resultArea').classList.remove('hidden');
+
+      // Save or update
+      const deals = getDeals();
+      const existingIndex = currentDealId ? deals.findIndex(d => d.id === currentDealId) : -1;
+      const deal = {
+        id: currentDealId || Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        location, zoning, acreage, price, arv, rehab, notes,
+        createdAt: existingIndex >= 0 ? deals[existingIndex].createdAt : new Date().toISOString()
+      };
+      if (existingIndex >= 0) deals[existingIndex] = deal;
+      else deals.unshift(deal);
+      saveDeals(deals);
+      renderDeals();
+      currentDealId = deal.id;
+    }
+
+    window.loadDeal = function(id) {
+      const deal = getDeals().find(d => d.id === id);
+      if (!deal) return;
+      currentDealId = deal.id;
+      document.getElementById('location').value = deal.location;
+      document.getElementById('zoning').value = deal.zoning;
+      document.getElementById('acreage').value = deal.acreage;
+      document.getElementById('price').value = deal.price;
+      document.getElementById('arv').value = deal.arv || '';
+      document.getElementById('rehab').value = deal.rehab || '';
+      document.getElementById('notes').value = deal.notes || '';
+      analyzeDeal();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.deleteDeal = function(id) {
+      if (!confirm('Delete this deal?')) return;
+      let deals = getDeals().filter(d => d.id !== id);
+      saveDeals(deals);
+      if (currentDealId === id) {
+        currentDealId = null;
+        document.getElementById('dealForm').reset();
+        document.getElementById('resultArea').classList.add('hidden');
+      }
+      renderDeals();
+    };
+
+    document.getElementById('dealForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      analyzeDeal();
+    });
+
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      currentDealId = null;
+      document.getElementById('dealForm').reset();
+      document.getElementById('resultArea').classList.add('hidden');
+    });
+
+    document.getElementById('clearAllBtn').addEventListener('click', () => {
+      if (!confirm('Delete ALL saved deals? This cannot be undone.')) return;
+      localStorage.removeItem(STORAGE_KEY);
+      currentDealId = null;
+      document.getElementById('dealForm').reset();
+      document.getElementById('resultArea').classList.add('hidden');
+      renderDeals();
+    });
+
+    renderDeals();
+  </script>
+</body>
+</html>
