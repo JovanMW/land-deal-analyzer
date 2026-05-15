@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Groundwork | Colin’s Deal Desk</title>
+  <title>Groundwork | Colin's Deal Desk</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -86,14 +86,12 @@
       position: relative;
     }
 
-    .hero h1 .accent {
-      color: var(--accent);
-    }
+    .hero h1 .accent { color: var(--accent); }
 
     .hero p {
       font-size: 17px;
       color: var(--text-2);
-      max-width: 460px;
+      max-width: 480px;
       margin: 0 auto 36px;
       line-height: 1.6;
     }
@@ -144,10 +142,50 @@
       margin: 0 24px;
     }
 
+    .goal-section {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 40px 24px 0;
+    }
+
+    .goal-card {
+      background: linear-gradient(135deg, rgba(83,74,183,0.12), rgba(127,119,221,0.06));
+      border: 0.5px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .goal-card h3 {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    .goal-card p {
+      font-size: 15px;
+      color: var(--text-2);
+      line-height: 1.6;
+    }
+
+    .goal-card ul {
+      margin-top: 12px;
+      padding-left: 20px;
+    }
+
+    .goal-card li {
+      font-size: 14px;
+      color: var(--text-2);
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+
     .tool-section {
       max-width: 720px;
       margin: 0 auto;
-      padding: 48px 24px 64px;
+      padding: 32px 24px 64px;
     }
 
     .tool-header {
@@ -183,6 +221,7 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
+      position: relative;
     }
 
     label {
@@ -203,6 +242,7 @@
       font-family: inherit;
       outline: none;
       transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%;
     }
 
     input:focus, select:focus, textarea:focus {
@@ -221,6 +261,58 @@
 
     .field-full {
       grid-column: 1 / -1;
+    }
+
+    .autocomplete-wrap {
+      position: relative;
+      grid-column: 1 / -1;
+    }
+
+    .suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--surface-2);
+      border: 0.5px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 10px 10px;
+      max-height: 220px;
+      overflow-y: auto;
+      z-index: 100;
+      display: none;
+      margin-top: -4px;
+      padding: 4px 0;
+    }
+
+    .suggestions.active {
+      display: block;
+    }
+
+    .suggestion-item {
+      padding: 10px 14px;
+      font-size: 14px;
+      color: var(--text-2);
+      cursor: pointer;
+      transition: background 0.15s;
+      border-bottom: 0.5px solid rgba(127,119,221,0.06);
+    }
+
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+
+    .suggestion-item:hover,
+    .suggestion-item.selected {
+      background: rgba(127,119,221,0.1);
+      color: var(--text);
+    }
+
+    .suggestion-item small {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
     }
 
     .actions {
@@ -440,6 +532,22 @@
       color: #2e2c48;
       font-size: 12px;
     }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(127,119,221,0.3);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
@@ -451,7 +559,7 @@
     </div>
     <h1>
       <span class="accent">Groundwork</span><br>
-      Colin’s Deal Desk
+      Colin's Deal Desk
     </h1>
     <p>Built for one investor. No fluff. No subscriptions. Just the numbers that separate good dirt from bad dirt.</p>
     <a href="#tool" class="hero-cta">
@@ -471,6 +579,19 @@
 
   <div class="divider"></div>
 
+  <section class="goal-section" id="goal">
+    <div class="goal-card">
+      <h3>The Mission</h3>
+      <p>Find undervalued land and property deals before anyone else sees them. Groundwork exists to make the math instant, the comparison obvious, and the decision fast.</p>
+      <ul>
+        <li><strong>Speed</strong> — analyze any deal in under 30 seconds</li>
+        <li><strong>Clarity</strong> — price per acre, total investment, ROI, and a hard rating</li>
+        <li><strong>Memory</strong> — every deal you enter is saved automatically. Compare them side by side.</li>
+        <li><strong>Zero friction</strong> — no login, no paywall, no cloud sync. Your data lives in your browser.</li>
+      </ul>
+    </div>
+  </section>
+
   <section class="tool-section" id="tool">
     <div class="tool-header">
       <h2>New Deal</h2>
@@ -479,9 +600,10 @@
 
     <form id="dealForm">
       <div class="form-grid">
-        <div class="field field-full">
-          <label for="location">Location / Address</label>
-          <input type="text" id="location" placeholder="e.g. 742 Maple St, Oakland CA" required>
+        <div class="field autocomplete-wrap">
+          <label for="location">Location / Address <span id="addrSpinner"></span></label>
+          <input type="text" id="location" placeholder="Start typing an address..." autocomplete="off" required>
+          <div id="suggestions" class="suggestions"></div>
         </div>
         <div class="field">
           <label for="zoning">Zoning</label>
@@ -565,6 +687,8 @@
   <script>
     const STORAGE_KEY = 'colin_land_deals_v1';
     let currentDealId = null;
+    let abortCtrl = null;
+    let selectedIndex = -1;
 
     function formatCurrency(n) {
       if (!n && n !== 0) return '—';
@@ -589,6 +713,110 @@
       const div = document.createElement('div');
       div.textContent = t;
       return div.innerHTML;
+    }
+
+    // Address autocomplete using Nominatim (OpenStreetMap) — free, no key
+    const locationInput = document.getElementById('location');
+    const suggestionsBox = document.getElementById('suggestions');
+    const spinner = document.getElementById('addrSpinner');
+
+    let debounceTimer;
+    locationInput.addEventListener('input', (e) => {
+      const query = e.target.value.trim();
+      clearTimeout(debounceTimer);
+      selectedIndex = -1;
+      if (query.length < 3) {
+        suggestionsBox.classList.remove('active');
+        suggestionsBox.innerHTML = '';
+        return;
+      }
+      debounceTimer = setTimeout(() => fetchAddresses(query), 400);
+    });
+
+    locationInput.addEventListener('keydown', (e) => {
+      const items = suggestionsBox.querySelectorAll('.suggestion-item');
+      if (!items.length) return;
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+        updateSelection(items);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        selectedIndex = Math.max(selectedIndex - 1, -1);
+        updateSelection(items);
+      } else if (e.key === 'Enter') {
+        if (selectedIndex >= 0 && items[selectedIndex]) {
+          e.preventDefault();
+          items[selectedIndex].click();
+        }
+      } else if (e.key === 'Escape') {
+        suggestionsBox.classList.remove('active');
+        selectedIndex = -1;
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.autocomplete-wrap')) {
+        suggestionsBox.classList.remove('active');
+        selectedIndex = -1;
+      }
+    });
+
+    function updateSelection(items) {
+      items.forEach((item, i) => {
+        item.classList.toggle('selected', i === selectedIndex);
+      });
+      if (selectedIndex >= 0 && items[selectedIndex]) {
+        items[selectedIndex].scrollIntoView({ block: 'nearest' });
+      }
+    }
+
+    async function fetchAddresses(query) {
+      if (abortCtrl) abortCtrl.abort();
+      abortCtrl = new AbortController();
+
+      spinner.innerHTML = '<span class="loading-spinner"></span>';
+
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&addressdetails=1&countrycodes=us`,
+          { signal: abortCtrl.signal, headers: { 'Accept-Language': 'en-US' } }
+        );
+        const data = await res.json();
+        spinner.innerHTML = '';
+
+        if (!data || !data.length) {
+          suggestionsBox.classList.remove('active');
+          return;
+        }
+
+        suggestionsBox.innerHTML = data.map((place, i) => {
+          const display = place.display_name || place.name || place.address?.road || query;
+          const city = place.address?.city || place.address?.town || place.address?.village || '';
+          const state = place.address?.state || '';
+          const sub = [city, state].filter(Boolean).join(', ');
+          return `<div class="suggestion-item" data-index="${i}" data-addr="${escapeHtml(display)}">
+            ${escapeHtml(display)}${sub ? `<small>${escapeHtml(sub)}</small>` : ''}
+          </div>`;
+        }).join('');
+
+        suggestionsBox.querySelectorAll('.suggestion-item').forEach(el => {
+          el.addEventListener('click', () => {
+            locationInput.value = el.getAttribute('data-addr');
+            suggestionsBox.classList.remove('active');
+            selectedIndex = -1;
+          });
+        });
+
+        suggestionsBox.classList.add('active');
+        selectedIndex = -1;
+      } catch (err) {
+        spinner.innerHTML = '';
+        if (err.name !== 'AbortError') {
+          console.error('Address fetch failed:', err);
+        }
+      }
     }
 
     function renderDeals() {
@@ -733,6 +961,7 @@
       currentDealId = null;
       document.getElementById('dealForm').reset();
       document.getElementById('resultArea').classList.add('hidden');
+      suggestionsBox.classList.remove('active');
     });
 
     document.getElementById('clearAllBtn').addEventListener('click', () => {
@@ -741,6 +970,7 @@
       currentDealId = null;
       document.getElementById('dealForm').reset();
       document.getElementById('resultArea').classList.add('hidden');
+      suggestionsBox.classList.remove('active');
       renderDeals();
     });
 
